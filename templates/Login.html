@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="shortcut icon" href="../img/—Pngtree—dragon head e-s logo_4308995.png" type="image/x-icon">
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit-id.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url('https://4kwallpapers.com/images/wallpapers/futuristic-modern-3840x2160-12471.jpg');
+            background-size: cover;
+            font-family: Arial, sans-serif;
+            background-repeat: no-repeat;
+        }
+
+        form {
+            color: white;
+            right: 35%;
+            top: 30%;
+            position: absolute;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            width: 500px;
+            height: 400px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            padding: 30px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .login {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+        }
+
+        form label {
+            text-align: left;
+            display: block;
+            margin-bottom: 10px;
+            font-size: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        form input[type="text"], form input[type="password"] {
+            background-color: rgba(0, 0, 0, 0.486);
+            width: 100%;
+            height: 28px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        form input[type="text"]:focus, form input[type="password"]:focus {
+            outline: none;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px #4d4d4d;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        form button[type="submit"] {
+            background-color: #8a1010;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .id {
+            color: white;
+        }
+
+        form input[type="submit"]:hover {
+            background-color: #b60101;
+        }
+
+        form p {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        form a {
+            text-decoration: none;
+            color: #794444;
+        }
+
+        form a:hover {
+            color: #d63232;
+        }
+    </style>
+</head>
+<body>
+<form action="/" method="POST">
+    <h1>Login</h1>
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" placeholder="Enter your username">
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" placeholder="Enter your password">
+    <i class="fa-solid fa-eye id" id="eye" onclick="togglePassword()"></i><br>
+    <button type="submit">Login</button>
+</form>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent the default form submission
+            const formData = new FormData(form);
+            const jsonData = {};
+            formData.forEach((value, key) => {
+                jsonData[key] = value;
+            });
+            fetch(form.action, {
+                method: form.method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(jsonData),
+            })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        console.log(data);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
+
+    function togglePassword() {
+        var passwordInput = document.getElementById("password");
+        var eyeIcon = document.getElementById("eye");
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            eyeIcon.classList.add("fa-eye-slash");
+            eyeIcon.classList.remove("fa-eye");
+        } else {
+            passwordInput.type = "password";
+            eyeIcon.classList.add("fa-eye");
+            eyeIcon.classList.remove("fa-eye-slash");
+        }
+    }
+</script>
+</body>
+</html>

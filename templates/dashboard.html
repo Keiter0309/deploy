@@ -13,6 +13,7 @@
         body {
             background-color: #f8f9fa;
         }
+
         .container {
             display: flex;
             flex-direction: column;
@@ -20,15 +21,19 @@
             justify-content: center;
             padding: 20px;
         }
+
         h1 {
             color: #6c757d;
         }
+
         li {
             color: #343a40;
         }
+
         .form-group {
             margin-top: 20px;
         }
+
         .btn-primary {
             background-color: #0d6efd;
         }
@@ -45,35 +50,78 @@
     <form action="/import-data" class="form-group" method="POST">
         {#    Select group    #}
         <select name="group" id="group" class="form-select">
-            <option value="1">Group 1</option>
-            <option value="2">Group 2</option>
-            <option value="3">Group 3</option>
+            {% for sheet in sheets %}
+                <option value="{{ sheet }}"> {{ sheet }}</option>
+            {% endfor %}
         </select>
         <input type="file" name="file" id="file" class="form-control">
         <button type="submit" class="btn btn-primary">Import</button>
     </form>
+
+    <form action="/dashboard" method="get" class="mt-5">
+        <select name="sheet_name" id="sheet_name" class="form-select">
+            {% for sheet in sheets %}
+                <option value="{{ sheet }}">{{ sheet }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary mt-3">View Sheet</button>
+    </form>
+
+    {% if sheet %}
+    <div class="mt-5">
+        <h1>Sheet Content</h1>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>UID</th>
+                <th>TÊN</th>
+                <th>LINK</th>
+                <th>NGÀY/ THÁNG CÀO</th>
+                <th>Unnamed: 5</th>
+                <th>SỐ LƯỢNG</th>
+                <th>GHI CHÚ</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in sheet.content %}
+                <tr>
+                    {% if row is mapping %}
+                        {% for value in row.values() %}
+                            <td>{{ value }}</td>
+                        {% endfor %}
+                    {% else %}
+                        {% for value in row %}
+                            <td>{{ value }}</td>
+                        {% endfor %}
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.0/js/bootstrap.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const formData = new FormData(form);
-        fetch(form.action, {
-            method: form.method,
-            body: formData
-        }).then(response => {
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.indexOf('application/json') !== -1) {
-                return response.json().then(data => console.log(data));
-            } else {
-                console.log('Oops, we haven\'t got JSON!');
-            }
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: form.method,
+                body: formData
+            }).then(response => {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.indexOf('application/json') !== -1) {
+                    return response.json().then(data => console.log(data));
+                } else {
+                    console.log('Oops, we haven\'t got JSON!');
+                }
+            });
         });
     });
-});
 </script>
 </body>
 </html>

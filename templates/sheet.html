@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sheet View</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+ <form action="/sheet" method="get" class="mt-5">
+        <select name="sheet_name" id="sheet_name" class="form-select">
+            {% for sheet in sheets %}
+                <option value="{{ sheet }}">{{ sheet }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary mt-3">View Sheet</button>
+    </form>
+
+    {% if sheet %}
+    <div class="mt-5">
+        <h1>Sheet Content</h1>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>UID</th>
+                <th>TÊN</th>
+                <th>LINK</th>
+                <th>NGÀY/ THÁNG CÀO</th>
+                <th>Unnamed: 5</th>
+                <th>SỐ LƯỢNG</th>
+                <th>GHI CHÚ</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in sheet.content %}
+                <tr>
+                    {% if row is mapping %}
+                        {% for value in row.values() %}
+                            <td>{{ value }}</td>
+                        {% endfor %}
+                    {% else %}
+                        {% for value in row %}
+                            <td>{{ value }}</td>
+                        {% endfor %}
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+</body>
+</html>
