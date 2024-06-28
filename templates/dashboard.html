@@ -42,9 +42,8 @@
 <body>
 <div class="container">
     <h1>Dashboard</h1>
-    {% for user in users %}
-        <li>Username: {{ user }}</li>
-    {% endfor %}
+    <h1>Users</h1>
+    <a href="/admin/create-user">Create User</a>
 
     <h1>Import data from Google Docs</h1>
     <form action="/import-data" class="form-group" method="POST">
@@ -68,38 +67,51 @@
     </form>
 
     {% if sheet %}
-    <div class="mt-5">
-        <h1>Sheet Content</h1>
-        <table class="table">
-            <thead>
-            <tr>
-                <th>UID</th>
-                <th>TÊN</th>
-                <th>LINK</th>
-                <th>NGÀY/ THÁNG CÀO</th>
-                <th>Unnamed: 5</th>
-                <th>SỐ LƯỢNG</th>
-                <th>GHI CHÚ</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for row in sheet.content %}
+        <div class="mt-5">
+            <div class="sheet-title" style="display: flex; justify-content: space-between">
+                <h1>Sheet Content</h1>
+                <select name="filter-pagination" id="filter-pagination">
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="150">150</option>
+                </select>
+            </div>
+            <table class="table">
+                <thead>
                 <tr>
-                    {% if row is mapping %}
-                        {% for value in row.values() %}
-                            <td>{{ value }}</td>
-                        {% endfor %}
-                    {% else %}
-                        {% for value in row %}
-                            <td>{{ value }}</td>
-                        {% endfor %}
-                    {% endif %}
+                    <th>UID</th>
+                    <th>TÊN</th>
+                    <th>LINK</th>
+                    <th>NGÀY/ THÁNG CÀO</th>
+                    <th>Unnamed: 5</th>
+                    <th>SỐ LƯỢNG</th>
+                    <th>GHI CHÚ</th>
                 </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-{% endif %}
+                </thead>
+                <tbody>
+                {% for row in sheet.content %}
+                    <tr>
+                        {% if row is mapping %}
+                            {% for value in row.values() %}
+                                <td>{{ value }}</td>
+                            {% endfor %}
+                        {% else %}
+                            {% for value in row %}
+                                <td>{{ value }}</td>
+                            {% endfor %}
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div>
+                {% if page > 1 %}
+                    <a href="{{ url_for('sheet', sheet_name=sheet_name, page=page-1) }}">Previous</a>
+                {% endif %}
+                <a href="{{ url_for('sheet', sheet_name=sheet_name, page=page + 1) }}">Next</a>
+            </div>
+        </div>
+    {% endif %}
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.0/js/bootstrap.min.js"></script>

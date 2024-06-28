@@ -4,11 +4,11 @@ from datetime import datetime
 from flask import request, jsonify
 from pymongo import MongoClient
 import pandas as pd
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 import os
 
 auth = Flask(__name__)
-auth.secret_key =  'mysecretkey'
+auth.secret_key = 'mysecretkey'
 mongo_client = MongoClient('localhost', 27017)
 db = mongo_client['flask-database']
 
@@ -44,17 +44,30 @@ def login():
 @auth.route('/dashboard', methods=['GET'])
 def dashboard():
     all_sheets = db['sheets'].find()
+    page = int(request.args.get('page', 1))
+    per_page = 50
+    skips = per_page * (page - 1)
+    total = db['sheets'].count_documents({})
+    total_pages = total // per_page
+    if total % per_page > 0:
+        total_pages += 1
     sheet_names = []
     sheet_name = request.args.get('sheet_name')
     sheet_content = db['sheets'].find_one({'sheet_name': sheet_name})
-    if not dashboard:
-        return jsonify({'error': 'Sheet not found'}), 404
+    if sheet_content:
+        sheet_content['content'] = sheet_content['content'][skips:skips + per_page]
 
     for sheet in all_sheets:
         sheet_names.append(sheet['sheet_name'])
 
-    return render_template('dashboard.html', sheets=sheet_names, sheet=sheet_content)
-
+    return render_template(
+        'dashboard.html',
+        sheets=sheet_names,
+        sheet=sheet_content,
+        page=page,
+        per_page=per_page,
+        total_pages=total_pages
+    )
 
 @auth.route('/import-data', methods=['POST'])
 def import_data():
@@ -107,6 +120,49 @@ def sheet():
         return jsonify({'error': 'Sheet not found'}), 404
 
     return render_template('dashboard.html', sheet=sheet_content)
+
+@auth.route('/logout', methods=['GET'])
+def logout():
+    session.pop('username', None)
+    return redirect('/', code=302)
+
+@auth.route('/admin/create-user', methods=['GET'])
+def add_user_form():
+    return render_template('add_user.html')
+
+@auth.route('/admin/create-user', methods=['POST'])
+def add_user():
+    # Get data from request
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
+    email = data.get('email')
+    username = data.get('username')
+    password = data.get('password')
+    role = data.get('role')
+    created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    created_by = session['username']
+
+    # Validate data
+    if not first_name or not last_name or not email or not username or not password:
+        return jsonify({'error': 'Missing data'}), 400
+
+    # Hash the password
+    hashed_password = generate_password_hash(password)
+
+    # Check if user already exists
+    user = db['users'].find_one({'username': username})
+    email_check = db['users'].find_one({'email': email})
+    if user or email_check:
+        return jsonify({'error': 'User already exists'}), 400
+
+    # Insert user into the database
+    db['users'].insert_one({'first_name': first_name, 'last_name': last_name, 'email': email, 'username': username, 'password': hashed_password, 'role': role, 'created_by': created_by  ,'created_at': created_at})
+
+    return jsonify({'message': 'User added successfully'}), 200
 
 if __name__ == '__main__':
     auth.run()
